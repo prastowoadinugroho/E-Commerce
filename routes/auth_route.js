@@ -7,6 +7,17 @@ const {check, validationResult} = require('express-validator');
 const gravatar = require('gravatar');
 
 const User = require('../models/User');
+const auth = require('../middleware/auth');
+
+router.get('/', auth, async(req,res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+        res.json(user);
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send('Server Error');
+    }
+})
 
 router.post('/register', [
     check('name', 'Name is required').notEmpty(), 
@@ -74,6 +85,69 @@ router.post('/register', [
         )
     } catch (error) {
         console.log(err.message);
+        res.status(500).send('Server error');
+    }
+})
+
+router.post('/login', [
+    check('email', 'please include a valid email').isEmail(),
+    check('password', 'password is required').exists()
+], async(req,res) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(400).json({
+            errors: errors.array()
+        })
+    }
+
+    //if oke => get email & pass from req body
+    const {email, password} = req.body;
+
+    try {
+        let user = await User.findOne({
+            email
+        });
+
+        if(!user){
+            return res.status(400).json({
+                errors: [{
+                    message: 'Invalid credentials'
+                }]
+            })
+        }
+
+        //password match
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        //not match password
+        if(!isMatch){
+            return res.status(400).json({
+                errors: [{
+                    message: 'Invalid credentials'
+                }]
+            })
+        }
+
+        //payload jwt
+        const payload = {
+            user: {
+                id: user.id
+            }
+        }
+
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET, {
+                expiresIn: 360000
+            }, (err, token) => {
+                if(err) throw err;
+                res.json({
+                    token
+                })
+            }
+        )
+    } catch (error) {
+        console.log(error.message);
         res.status(500).send('Server error');
     }
 })
