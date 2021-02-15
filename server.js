@@ -1,15 +1,23 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
-
+const bodyParser = require('body-parser');
 const app = express();
+
+//Insert with raw json
+app.use(bodyParser.json());
+
 require('dotenv').config({
     path: './config/index.env'
 });
 
-app.use(express.urlencoded({extended: true}));
+const connDB = require('./config/db');
+connDB();
+
 app.use(morgan('dev'));
 app.use(cors());
+
+app.use('/api/user/', require('./routes/auth_route'));
 
 app.get("/",(req,res) => {
     res.send('tes => home page');
