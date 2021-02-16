@@ -30,10 +30,10 @@ const NavbarList = ({history}) => {
                 listStyle={isActive(history,'/dashboard')}
             />
             <Button
-                title='Signout'
+                title='Logout'
                 moreStyle='hover:text-primary'
                 action= {() => {
-                    console.log('signout')
+                    console.log('logout')
                 }}
             />
             <Button
