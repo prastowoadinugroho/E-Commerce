@@ -1,0 +1,21 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+.animate {
+    @apply transition duration-500 ease-in-out transform;
+  }
+  
+.animate:hover {
+  @apply scale-110 -translate-y-1;
+}
+  
+.navbar {
+  @apply flex flex-col items-center justify-between w-full p-1 mt-3 bg-white rounded-md shadow-md;
+}
+  
+@media (min-width: 768px) {
+  .navbar {
+    @apply flex-row;
+  }
+}
