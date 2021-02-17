@@ -5,10 +5,10 @@ import { connect } from 'react-redux';
 import Container from '../components/container/container.component';
 import FormInput from '../components/inputs/form.input.component';
 import Button from '../components/buttons/button.component';
-import Gap from '../components/gap/gap.compnent';
 import { register } from '../data/reducers/auth';
+import './loading.css';
 
-const Register = ({register}) => {
+const Register = ({register,isAuth,isLoading,user}) => {
     const [data, setData] = useState({
         name: '',
         email: '',
@@ -67,12 +67,16 @@ const Register = ({register}) => {
                     handleChange={handleChange('confirmPassword')}
                     type='password'
                 />
-                <Gap height={20}/>
-                <Button
+                {isLoading && <div 
+                    id='loading'
+                    className='self-center mb-3'
+                ></div>}
+                {!isLoading && <Button
                     title='SignUp'
                     moreStyle='bg-primary text-white w-full mb-3'
                     type='submit'
-                />
+                />}
+
                 <div className="flex justify-end w-full">
                     <Button
                     isButton={false}
@@ -86,4 +90,9 @@ const Register = ({register}) => {
     )
 }
 
-export default connect(null, {register})(Register)
+const mapStateToStateProps = state => ({
+    isAuth: state.auth.isAuthenticated,
+    isLoading: state.auth.loading,
+    user: state.auth.user
+})
+export default connect(mapStateToStateProps, {register})(Register)
