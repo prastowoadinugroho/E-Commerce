@@ -5,19 +5,17 @@ import { connect } from 'react-redux';
 import Container from '../components/container/container.component';
 import FormInput from '../components/inputs/form.input.component';
 import Button from '../components/buttons/button.component';
-import { register } from '../data/reducers/auth';
+import { login } from '../data/reducers/auth';
 import './loading.css';
 import { Redirect } from 'react-router-dom';
 
-const Register = ({register,isAuth,isLoading,user}) => {
+const Login = ({login,isAuth,isLoading,user}) => {
     const [data, setData] = useState({
-        name: '',
         email: '',
-        password: '',
-        confirmPassword: ''
+        password: ''
     })
 
-    const { name, email, password, confirmPassword } = data
+    const { email, password } = data
 
     const handleChange = (name) => event => {
         setData({...data, [name]: event.target.value})
@@ -25,16 +23,12 @@ const Register = ({register,isAuth,isLoading,user}) => {
 
     const onSubmit = async(e) => {
         e.preventDefault();
-        if(password !== confirmPassword){
-            toast.error('Password do not match');
-        } else {
-            register({name, email, password})
-        }
+        login({email, password})
     }
     
     if(isAuth && user){
         const { name, role } = user;
-        toast.success(`welcome ${name}`)
+        toast.success(`Welcome ${name}`)
         if(role === 0 ) return <Redirect to='/dashboard/user'/>
         if(role === 1 ) return <Redirect to='/dashboard/admin'/>
     }
@@ -46,15 +40,8 @@ const Register = ({register,isAuth,isLoading,user}) => {
         onSubmit={onSubmit}
       >
                 <h2 className="mb-5 text-2xl font-bold text-center">
-                    Register
+                    Login
                 </h2>
-                <FormInput
-                    title='Name'
-                    placeholder='Example'
-                    value={name}
-                    handleChange={handleChange('name')}
-                    type='text'
-                />
                 <FormInput
                     title='Email'
                     placeholder='example@gmail.com'
@@ -69,19 +56,12 @@ const Register = ({register,isAuth,isLoading,user}) => {
                     handleChange={handleChange('password')}
                     type='password'
                 />
-                <FormInput
-                    title='Confirm Password'
-                    placeholder='********'
-                    value={confirmPassword}
-                    handleChange={handleChange('confirmPassword')}
-                    type='password'
-                />
                 {isLoading && <div 
                     id='loading'
                     className='self-center mb-3'
                 ></div>}
                 {!isLoading && <Button
-                    title='SignUp'
+                    title='SignIn'
                     moreStyle='bg-primary text-white w-full mb-3'
                     type='submit'
                 />}
@@ -89,8 +69,8 @@ const Register = ({register,isAuth,isLoading,user}) => {
                 <div className="flex justify-end w-full">
                     <Button
                     isButton={false}
-                    title='already have an account ?'
-                    href='/login'
+                    title='did you need new account ?'
+                    href='/register'
                     moreStyle='text-small text-gray-700'
                     />
                 </div>
@@ -104,4 +84,4 @@ const mapStateToStateProps = state => ({
     isLoading: state.auth.loading,
     user: state.auth.user
 })
-export default connect(mapStateToStateProps, {register})(Register)
+export default connect(mapStateToStateProps, {login})(Login)

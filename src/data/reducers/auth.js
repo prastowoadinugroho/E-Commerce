@@ -6,6 +6,8 @@ import { URLDevelopment } from '../../helpers/URL';
 //type
 const REGISTER_SUCCESS = 'REGISTER_SUCCESS';
 const REGISTER_FAIL = 'REGISTER_FAIL';
+const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
+const LOGIN_FAIL = 'LOGIN_FAIL';
 const USER_LOADED = 'USER_LOADED';
 const AUTH_ERROR = 'AUTH_ERROR';
 const LOGOUT = 'LOGOUT';
@@ -27,38 +29,39 @@ export default function (state = initialState, action){
         case USER_LOADED:
             return {
                 ...state,
-                payload,
-                isAuthenticated: true,
-                loading: false
+                user: payload,
+                    isAuthenticated: true,
+                    loading: false
             }
-
             case REGISTER_SUCCESS:
+            case LOGIN_SUCCESS:
             //set token local storage
-            localStorage.getItem('token', payload.token);
-            return {
-                ...state,
-                ...payload,
-                isAuthenticated: true,
-                loading: false,
-            };
-        case SET_LOADING:
-            return {
-                ...state,
-                loading: true
-            }
-            case REGISTER_FAIL:
-            case AUTH_ERROR:    
-            case LOGOUT:
-            //remove token local storage
-            localStorage.removeItem('token');
-            return {
-                ...state,
-                token: null,
-                isAuthenticated: false,
-                loading: false,
-            };
-            default:
-                return state;
+                localStorage.setItem('token', payload.token);
+                return {
+                    ...state,
+                    ...payload,
+                    isAuthenticated: true,
+                    loading: false,
+                };
+            case SET_LOADING:
+                return {
+                    ...state,
+                    loading: true
+                }
+                case REGISTER_FAIL:
+                case LOGIN_FAIL:
+                case AUTH_ERROR:    
+                case LOGOUT:
+                //remove token local storage
+                localStorage.removeItem('token');
+                return {
+                    ...state,
+                    token: null,
+                    isAuthenticated: false,
+                    loading: false,
+                };
+                default:
+                    return state;
     }
 }
 
@@ -88,10 +91,12 @@ export const register = ({name,email,password}) => async(dispatch) => {
             'Content-Type' : 'application/json'
         }
     }
+
+    const body = JSON.stringify({name, email, password});
+
     dispatch({
         type: SET_LOADING
     })
-    const body = JSON.stringify({name, email, password});
 
     try {
         const res = await axios.post(`${URLDevelopment}/api/user/register`,body,config)
@@ -100,9 +105,8 @@ export const register = ({name,email,password}) => async(dispatch) => {
             type: REGISTER_SUCCESS,
             payload: res.data
         })
-        dispatch({
-            type: SET_LOADING
-        })
+        
+        // dispatch(loadUser())
         
     } catch (err) {
         const errors = err.response.data.errors
@@ -112,6 +116,40 @@ export const register = ({name,email,password}) => async(dispatch) => {
 
         dispatch({
             type: REGISTER_FAIL
+        })
+    }
+}
+export const login = ({email,password}) => async(dispatch) => {
+    const config = {
+        headers: {
+            'Content-Type' : 'application/json'
+        }
+    }
+
+    const body = JSON.stringify({email, password});
+
+    dispatch({
+        type: SET_LOADING
+    })
+
+    try {
+        const res = await axios.post(`${URLDevelopment}/api/user/login`,body,config)
+
+        dispatch({
+            type: LOGIN_SUCCESS,
+            payload: res.data
+        })
+        
+        dispatch(loadUser())
+        
+    } catch (err) {
+        const errors = err.response.data.errors
+        if(errors) {
+            errors.forEach(error => toast.error(error.msg))
+        }
+
+        dispatch({
+            type: LOGIN_FAIL
         })
     }
 }
