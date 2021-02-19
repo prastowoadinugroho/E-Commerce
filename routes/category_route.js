@@ -5,6 +5,7 @@ const auth = require('../middleware/auth');
 
 const { check, validationResult } = require('express-validator');
 const adminAuth = require('../middleware/adminAuth');
+const categoryById = require('../middleware/categoryById');
 
 //private admin
 router.post('/', [
@@ -43,6 +44,40 @@ router.get('/all',async(req,res) => {
     } catch (error) {
         console.log(error);
         res.status(500).send('Server error')
+    }
+})
+
+router.get('/:categoryId', categoryById, async(req,res) => {
+    res.json(req.category)
+})
+
+//update category => role-admin
+router.put('/:categoryId', auth, adminAuth, categoryById, async(req, res) => {
+    let category = req.category;
+    const {
+        name
+    } = req.body
+    if(name) category.name = name.trim()
+    try {
+        category = await category.save()
+        res.json(category)
+    } catch (error) {
+        console.log(error)
+        res.status(500).send('Server error')
+    }
+})
+
+//delete category => role-admin
+router.delete('/:categoryId', auth, adminAuth, categoryById, async(req,res) => {
+    let category = req.category;
+    try {
+        let deleteCategory = await category.remove()
+        res.json({
+            message: `${deleteCategory.name} delete succsessfully`
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Server error');
     }
 })
 
