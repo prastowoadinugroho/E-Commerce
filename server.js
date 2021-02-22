@@ -19,6 +19,7 @@ app.use(cors());
 
 app.use('/api/user/', require('./routes/auth_route'));
 app.use('/api/category/', require('./routes/category_route'));
+app.use('/api/product/', require('./routes/product_route'));
 
 app.get("/",(req,res) => {
     res.send('tes => home page');
